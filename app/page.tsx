@@ -1,12 +1,9 @@
 import { getMeals } from "@/actions/meals";
-import { auth, signIn } from "@/auth";
+import AuthChecker from "@/components/auth-checker";
 import { DailyDietTracker } from "@/components/diet-tracker";
 import { ThemeToggle } from "@/components/theme-toggle";
 
 export default async function Home() {
-  const session = await auth();
-  if (!session?.user?.id) await signIn("google");
-
   const meals = await getMeals();
 
   console.log(meals);
@@ -17,7 +14,9 @@ export default async function Home() {
         <h1 className="font-bold text-2xl flex items-center justify-center gap-2 w-full">
           Diet Tracker <ThemeToggle />
         </h1>
-        <DailyDietTracker initialMeals={meals} />
+        <AuthChecker>
+          <DailyDietTracker initialMeals={meals} />
+        </AuthChecker>
       </div>
     </div>
   );
