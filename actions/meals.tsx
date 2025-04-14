@@ -44,6 +44,7 @@ export async function setDone(itemId: string, done: boolean, day: Date) {
     await prisma.foodItemDone.deleteMany({
       where: {
         foodItemId: itemId,
+        date: normalizedDay,
       },
     });
   }
