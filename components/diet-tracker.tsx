@@ -2,22 +2,30 @@
 
 import { useState } from "react";
 import { format, addDays, subDays, isSameDay } from "date-fns";
-import { ChevronLeft, ChevronRight, Check } from "lucide-react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { Checkbox } from "@/components/ui/checkbox";
 import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
-import { normalizeDateToDay } from "@/lib/date";
-import { getMeals, setDone } from "@/actions/meals";
+import {
+  FullFoodItem,
+  getMeals,
+  MealWithFullItems,
+  setDone,
+} from "@/actions/meals";
+import { DietItem } from "./diet-item";
 
-export function DailyDietTracker({ initialMeals }: { initialMeals: any[] }) {
+export function DailyDietTracker({
+  initialMeals,
+}: {
+  initialMeals: MealWithFullItems[];
+}) {
   const [currentDate, setCurrentDate] = useState(new Date());
-  const [meals, setMeals] = useState<any[]>(initialMeals);
+  const [meals, setMeals] = useState<MealWithFullItems[]>(initialMeals);
 
   console.log(meals);
 
@@ -32,7 +40,7 @@ export function DailyDietTracker({ initialMeals }: { initialMeals: any[] }) {
   };
 
   // Toggle completion status of a food item
-  const toggleFoodItem = async (item: any) => {
+  const toggleFoodItem = async (item: FullFoodItem) => {
     if (item.done.some((d) => isSameDay(d.date, currentDate))) {
       await setDone(item.id, false, currentDate);
     } else {
@@ -104,11 +112,9 @@ export function DailyDietTracker({ initialMeals }: { initialMeals: any[] }) {
                     <span>{meal.name}</span>
                     <span className="text-sm font-normal">
                       {
-                        meal.items.filter((item: any) =>
-                          item.done.some(
-                            (done: any) =>
-                              done.date.getTime() ===
-                              normalizeDateToDay(currentDate)
+                        meal.items.filter((item: FullFoodItem) =>
+                          item.done?.some((done) =>
+                            isSameDay(done.date, currentDate)
                           )
                         ).length
                       }
@@ -121,28 +127,12 @@ export function DailyDietTracker({ initialMeals }: { initialMeals: any[] }) {
                 <CardContent className="pt-0">
                   <ul className="space-y-2">
                     {meal.items.map((item) => (
-                      <li key={item.id} className="flex items-center space-x-2">
-                        <Checkbox
-                          id={`${meal.id}-${item.id}`}
-                          checked={item.done.some((d) =>
-                            isSameDay(d.date, currentDate)
-                          )}
-                          onCheckedChange={() => toggleFoodItem(item)}
-                        />
-                        <label
-                          htmlFor={`${meal.id}-${item.id}`}
-                          className={`flex-grow cursor-pointer ${
-                            item.completed
-                              ? "line-through text-muted-foreground"
-                              : ""
-                          }`}
-                        >
-                          {item.name}
-                        </label>
-                        {item.done.some((d) =>
-                          isSameDay(d.date, currentDate)
-                        ) && <Check className="h-4 w-4 text-green-500" />}
-                      </li>
+                      <DietItem
+                        item={item}
+                        currentDate={currentDate}
+                        toggleFoodItem={toggleFoodItem}
+                        key={item.id}
+                      />
                     ))}
                   </ul>
                 </CardContent>

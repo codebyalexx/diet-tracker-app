@@ -3,8 +3,25 @@
 import { auth } from "@/auth";
 import { normalizeDateToDay } from "@/lib/date";
 import { prisma } from "@/lib/prisma";
+import { Prisma } from "@prisma/client";
 
-export async function getMeals() {
+export type MealWithFullItems = Prisma.MealGetPayload<{
+  include: {
+    items: {
+      include: {
+        done: true;
+      };
+    };
+  };
+}>;
+
+export type FullFoodItem = Prisma.FoodItemGetPayload<{
+  include: {
+    done: true;
+  };
+}>;
+
+export async function getMeals(): Promise<MealWithFullItems[]> {
   const session = await auth();
   if (!session?.user?.id) return [];
 
