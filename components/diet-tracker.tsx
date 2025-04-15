@@ -48,6 +48,7 @@ export function DailyDietTracker({
     }
     const newMeals = await getMeals();
     setMeals(newMeals);
+    return true;
   };
 
   // Calculate overall progress
