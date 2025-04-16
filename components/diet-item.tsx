@@ -22,7 +22,7 @@ export const DietItem = ({
 }: {
   item: FullFoodItem;
   meal: MealWithFullItems;
-  toggleFoodItem: (item: FullFoodItem) => Promise<boolean>;
+  toggleFoodItem: (item: FullFoodItem) => void;
   currentDate: Date;
   editMode: boolean;
   onUpdate: () => void;
