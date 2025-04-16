@@ -1,6 +1,5 @@
 "use client";
 
-import { Meal } from "@prisma/client";
 import { Button } from "./ui/button";
 import {
   Dialog,
@@ -10,11 +9,16 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "./ui/dialog";
-import { CarrotIcon, Loader2Icon } from "lucide-react";
+import { CarrotIcon, Loader2Icon, PencilLineIcon } from "lucide-react";
 import { Label } from "./ui/label";
 import { Input } from "./ui/input";
 import { ChangeEvent, useState, useTransition } from "react";
-import { addFoodItem } from "@/actions/meals";
+import {
+  addFoodItem,
+  editFoodItem,
+  FullFoodItem,
+  MealWithFullItems,
+} from "@/actions/meals";
 
 export type AddFoodItemFormType = {
   name: string;
@@ -37,15 +41,26 @@ const defaultAddFoodItemFormData: AddFoodItemFormType = {
 export const AddFoodItemDialog = ({
   meal,
   onComplete,
+  item,
 }: {
-  meal: Meal;
+  meal: MealWithFullItems;
   onComplete: () => void;
+  item?: FullFoodItem;
 }) => {
   const [isOpen, setOpen] = useState(false);
   const [isLoading, startTransition] = useTransition();
 
   const [data, setData] = useState<AddFoodItemFormType>(
-    defaultAddFoodItemFormData
+    item
+      ? {
+          name: item.name,
+          portion: item.portion || "",
+          calories: item.calories,
+          proteins: item.proteins,
+          carbs: item.carbs,
+          fat: item.fat,
+        }
+      : defaultAddFoodItemFormData
   );
 
   const handleCancel = () => {
@@ -55,11 +70,19 @@ export const AddFoodItemDialog = ({
 
   const handleSave = async () => {
     startTransition(async () => {
-      const res = await addFoodItem(meal.id, data);
-      if (res) {
-        setData(defaultAddFoodItemFormData);
-        setOpen(false);
-        onComplete();
+      if (item) {
+        const res = await editFoodItem(item.id, data);
+        if (res) {
+          setOpen(false);
+          onComplete();
+        }
+      } else {
+        const res = await addFoodItem(meal.id, data);
+        if (res) {
+          setData(defaultAddFoodItemFormData);
+          setOpen(false);
+          onComplete();
+        }
       }
     });
   };
@@ -81,14 +104,20 @@ export const AddFoodItemDialog = ({
       }}
     >
       <DialogTrigger asChild>
-        <Button className="w-full" size={"sm"} variant={"outline"}>
-          <CarrotIcon /> Add Food Item
-        </Button>
+        {item ? (
+          <Button className="size-8 cursor-pointer" variant={"secondary"}>
+            <PencilLineIcon />
+          </Button>
+        ) : (
+          <Button className="w-full" size={"sm"} variant={"outline"}>
+            <CarrotIcon /> {item ? "Edit" : "Add"} Food Item
+          </Button>
+        )}
       </DialogTrigger>
       <DialogContent className="max-w-xl">
         <DialogHeader className="mb-2">
           <DialogTitle className="flex items-center gap-2">
-            <CarrotIcon /> Add Food Item ({meal.name})
+            <CarrotIcon /> {item ? "Edit" : "Add"} Food Item ({meal.name})
           </DialogTitle>
         </DialogHeader>
         <div className="space-y-6">

@@ -2,16 +2,11 @@
 
 import { isSameDay } from "date-fns";
 import { Checkbox } from "./ui/checkbox";
-import {
-  Check,
-  Loader2Icon,
-  LoaderIcon,
-  PencilLineIcon,
-  Trash2Icon,
-} from "lucide-react";
-import { FullFoodItem } from "@/actions/meals";
+import { Check, Loader2Icon, Trash2Icon } from "lucide-react";
+import { FullFoodItem, MealWithFullItems } from "@/actions/meals";
 import { useTransition } from "react";
 import { Button } from "./ui/button";
+import { AddFoodItemDialog } from "./diet-dialogs";
 
 export const isItemCompleted = (item: FullFoodItem, currentDate: Date) => {
   return item.done.some((d) => isSameDay(d.date, currentDate));
@@ -19,14 +14,18 @@ export const isItemCompleted = (item: FullFoodItem, currentDate: Date) => {
 
 export const DietItem = ({
   item,
+  meal,
   toggleFoodItem,
   currentDate,
   editMode,
+  onUpdate,
 }: {
   item: FullFoodItem;
+  meal: MealWithFullItems;
   toggleFoodItem: (item: FullFoodItem) => Promise<boolean>;
   currentDate: Date;
   editMode: boolean;
+  onUpdate: () => void;
 }) => {
   const [isLoading, startTransition] = useTransition();
 
@@ -65,9 +64,14 @@ export const DietItem = ({
       {editMode ? (
         <>
           <div className="flex items-center gap-1">
-            <Button className="size-8 cursor-pointer" variant={"secondary"}>
-              <PencilLineIcon />
-            </Button>
+            <AddFoodItemDialog
+              meal={meal}
+              onComplete={() => {
+                onUpdate();
+              }}
+              item={item}
+              key={item.id}
+            />
             <Button className="size-8 cursor-pointer" variant={"secondary"}>
               <Trash2Icon className="text-red-400" />
             </Button>

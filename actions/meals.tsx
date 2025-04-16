@@ -86,3 +86,20 @@ export async function addFoodItem(mealId: string, data: AddFoodItemFormType) {
 
   return true;
 }
+
+export async function editFoodItem(itemId: string, data: AddFoodItemFormType) {
+  const session = await auth();
+  if (!session?.user?.id) return false;
+
+  const item = await prisma.foodItem.findFirst({ where: { id: itemId } });
+  if (!item) return false;
+
+  await prisma.foodItem.update({
+    data,
+    where: {
+      id: itemId,
+    },
+  });
+
+  return true;
+}

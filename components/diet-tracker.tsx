@@ -133,10 +133,15 @@ export function DailyDietTracker({
                     {meal.items.map((item) => (
                       <DietItem
                         item={item}
+                        meal={meal}
                         currentDate={currentDate}
                         toggleFoodItem={toggleFoodItem}
                         key={item.id}
                         editMode={editMode}
+                        onUpdate={async () => {
+                          const newMeals = await getMeals();
+                          setMeals(newMeals);
+                        }}
                       />
                     ))}
                   </ul>
