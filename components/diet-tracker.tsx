@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { format, addDays, subDays, isSameDay } from "date-fns";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { BrushIcon, ChevronLeft, ChevronRight, PlusIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
@@ -18,6 +18,8 @@ import {
   setDone,
 } from "@/actions/meals";
 import { DietItem } from "./diet-item";
+import { cn } from "@/lib/utils";
+import { AddFoodItemDialog } from "./diet-dialogs";
 
 export function DailyDietTracker({
   initialMeals,
@@ -26,6 +28,7 @@ export function DailyDietTracker({
 }) {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [meals, setMeals] = useState<MealWithFullItems[]>(initialMeals);
+  const [editMode, setEditMode] = useState(false);
 
   console.log(meals);
 
@@ -125,7 +128,7 @@ export function DailyDietTracker({
                 </CardHeader>
               </CollapsibleTrigger>
               <CollapsibleContent>
-                <CardContent className="pt-0">
+                <CardContent className="pt-0 space-y-4">
                   <ul className="space-y-2">
                     {meal.items.map((item) => (
                       <DietItem
@@ -133,14 +136,48 @@ export function DailyDietTracker({
                         currentDate={currentDate}
                         toggleFoodItem={toggleFoodItem}
                         key={item.id}
+                        editMode={editMode}
                       />
                     ))}
                   </ul>
+                  {editMode ? (
+                    <AddFoodItemDialog
+                      meal={meal}
+                      onComplete={async () => {
+                        const newMeals = await getMeals();
+                        setMeals(newMeals);
+                      }}
+                    />
+                  ) : (
+                    ""
+                  )}
                 </CardContent>
               </CollapsibleContent>
             </Collapsible>
           </Card>
         ))}
+      </div>
+
+      <div className="flex items-center justify-between">
+        <Button
+          className={cn(
+            "cursor-pointer border-2",
+            editMode ? "border-green-600" : ""
+          )}
+          variant={"secondary"}
+          onClick={() => {
+            setEditMode(!editMode);
+          }}
+        >
+          <BrushIcon /> Edit Mode
+        </Button>
+        {editMode ? (
+          <Button className={"cursor-pointer border-2"} variant={"secondary"}>
+            <PlusIcon /> Create Meal
+          </Button>
+        ) : (
+          ""
+        )}
       </div>
     </div>
   );

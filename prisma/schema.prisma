@@ -93,6 +93,7 @@ model FoodItem {
   id String @id @default(cuid())
 
   name     String
+  portion  String?
   calories Int
   proteins Int
   carbs    Int

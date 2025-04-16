@@ -1,6 +1,7 @@
 "use server";
 
 import { auth } from "@/auth";
+import { AddFoodItemFormType } from "@/components/diet-dialogs";
 import { normalizeDateToDay } from "@/lib/date";
 import { prisma } from "@/lib/prisma";
 import { Prisma } from "@prisma/client";
@@ -65,6 +66,23 @@ export async function setDone(itemId: string, done: boolean, day: Date) {
       },
     });
   }
+
+  return true;
+}
+
+export async function addFoodItem(mealId: string, data: AddFoodItemFormType) {
+  const session = await auth();
+  if (!session?.user?.id) return false;
+
+  const meal = await prisma.meal.findFirst({ where: { id: mealId } });
+  if (!meal) return false;
+
+  await prisma.foodItem.create({
+    data: {
+      ...data,
+      mealId,
+    },
+  });
 
   return true;
 }
