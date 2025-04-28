@@ -2,7 +2,13 @@
 
 import { useCallback, useState } from "react";
 import { format, addDays, subDays, isSameDay } from "date-fns";
-import { BrushIcon, ChevronLeft, ChevronRight, PlusIcon } from "lucide-react";
+import {
+  BrushIcon,
+  ChevronLeft,
+  ChevronRight,
+  PlusIcon,
+  Trash2Icon,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
@@ -20,6 +26,8 @@ import {
 import { DietItem } from "./diet-item";
 import { cn } from "@/lib/utils";
 import { AddFoodItemDialog } from "./diet-dialogs";
+import { Badge } from "./ui/badge";
+import { isTheSameDay } from "@/lib/date";
 
 export function DailyDietTracker({
   initialMeals,
@@ -85,7 +93,6 @@ export function DailyDietTracker({
           <ChevronRight className="h-4 w-4" />
         </Button>
       </div>
-
       <Card>
         <CardHeader className="pb-2">
           <CardTitle className="text-lg flex justify-between items-center">
@@ -98,47 +105,86 @@ export function DailyDietTracker({
         </CardContent>
       </Card>
 
-      <div className="space-y-3">
+      <Card>
+        <CardHeader className="pb-2">
+          <CardTitle className="text-lg flex justify-between items-center">
+            <span>Daily Nutrition</span>
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-2">
+          <p className="text-2xl font-semibold">0 kcal</p>
+          <div className="grid grid-cols-3 gap-2">
+            <div className="p-2 bg-muted flex flex-col items-center justify-center rounded-lg">
+              <span className="text-sm text-muted-foreground">Proteins</span>
+              <p className="font-semibold">0g</p>
+            </div>
+            <div className="p-2 bg-muted flex flex-col items-center justify-center rounded-lg">
+              <span className="text-sm text-muted-foreground">Carbs</span>
+              <p className="font-semibold">0g</p>
+            </div>
+            <div className="p-2 bg-muted flex flex-col items-center justify-center rounded-lg">
+              <span className="text-sm text-muted-foreground">Fat</span>
+              <p className="font-semibold">0g</p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      <div className="space-y-8">
         {meals.map((meal) => {
           const doneCount = meal.items.filter((item) =>
             item.done.some((d) => isSameDay(d.date, currentDate))
           ).length;
 
           return (
-            <Card key={meal.id}>
-              <Collapsible open>
-                <CollapsibleTrigger asChild>
-                  <CardHeader className="pb-2 cursor-pointer">
-                    <CardTitle className="text-lg flex justify-between items-center">
-                      <span>{meal.name}</span>
-                      <span className="text-sm font-normal">
-                        {doneCount}/{meal.items.length}
-                      </span>
-                    </CardTitle>
-                  </CardHeader>
-                </CollapsibleTrigger>
-                <CollapsibleContent>
-                  <CardContent className="pt-0 space-y-4">
-                    <ul className="space-y-2">
-                      {meal.items.map((item) => (
-                        <DietItem
-                          key={item.id}
-                          item={item}
-                          meal={meal}
-                          currentDate={currentDate}
-                          toggleFoodItem={toggleFoodItem}
-                          editMode={editMode}
-                          onUpdate={updateMeals}
-                        />
-                      ))}
-                    </ul>
-                    {editMode && (
-                      <AddFoodItemDialog meal={meal} onComplete={updateMeals} />
-                    )}
-                  </CardContent>
-                </CollapsibleContent>
-              </Collapsible>
-            </Card>
+            <div key={meal.id} className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <h2 className="text-2xl font-bold">{meal.name}</h2>
+                  {editMode ? (
+                    <Button
+                      className="w-8 h-8 cursor-pointer"
+                      variant={"secondary"}
+                    >
+                      <Trash2Icon className="w-4 h-4 text-red-400" />
+                    </Button>
+                  ) : (
+                    ""
+                  )}
+                  <Badge variant={"secondary"}>
+                    {meal.items
+                      .filter((i) =>
+                        i.done.some((d) => isTheSameDay(d.date, currentDate))
+                      )
+                      .reduce((sum, item) => sum + item.calories, 0)}{" "}
+                    /{" "}
+                    <span className="text-muted-foreground">
+                      {meal.items.reduce((sum, item) => sum + item.calories, 0)}{" "}
+                      kcal
+                    </span>
+                  </Badge>
+                </div>
+                <span className="text-sm text-muted-foreground">
+                  {doneCount} / {meal.items.length}
+                </span>
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                {meal.items.map((item) => (
+                  <DietItem
+                    key={item.id}
+                    item={item}
+                    meal={meal}
+                    currentDate={currentDate}
+                    toggleFoodItem={toggleFoodItem}
+                    editMode={editMode}
+                    onUpdate={updateMeals}
+                  />
+                ))}
+              </div>
+              {editMode && (
+                <AddFoodItemDialog meal={meal} onComplete={updateMeals} />
+              )}
+            </div>
           );
         })}
       </div>
