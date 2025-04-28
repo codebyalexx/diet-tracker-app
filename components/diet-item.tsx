@@ -2,12 +2,12 @@
 
 import { isSameDay } from "date-fns";
 import { useTransition } from "react";
-import { Checkbox } from "./ui/checkbox";
 import { Button } from "./ui/button";
-import { Check, Loader2Icon, Trash2Icon } from "lucide-react";
+import { Check, Trash2Icon } from "lucide-react";
 import { FullFoodItem, MealWithFullItems } from "@/actions/meals";
 import { AddFoodItemDialog } from "./diet-dialogs";
 import { cn } from "@/lib/utils";
+import { Badge } from "./ui/badge";
 
 export const isItemCompleted = (item: FullFoodItem, currentDate: Date) =>
   item.done.some((d) => isSameDay(d.date, currentDate));
@@ -31,7 +31,7 @@ export const DietItem = ({
   const completed = isItemCompleted(item, currentDate);
 
   const handleToggle = () => {
-    if (!isLoading) {
+    if (!isLoading && !editMode) {
       startTransition(async () => {
         await toggleFoodItem(item);
       });
@@ -39,38 +39,71 @@ export const DietItem = ({
   };
 
   return (
-    <li className="flex items-center space-x-2">
-      {isLoading ? (
-        <Loader2Icon className="w-4 h-4 animate-spin" />
-      ) : (
-        <Checkbox
-          disabled={isLoading}
-          id={`${item.mealId}-${item.id}`}
-          checked={completed}
-          onCheckedChange={handleToggle}
-        />
-      )}
-      <label
-        htmlFor={`${item.mealId}-${item.id}`}
+    <>
+      <li
         className={cn(
-          "flex-grow cursor-pointer",
-          completed && "line-through text-muted-foreground",
-          isLoading && "text-muted-foreground"
+          "block p-4 space-y-2 rounded-xl border-2 bg-accent select-none cursor-pointer",
+          completed && "border-green-500"
         )}
+        onClick={handleToggle}
       >
-        {item.name}
-      </label>
+        <div className="w-full flex items-center justify-between space-x-2">
+          <label
+            htmlFor={`${item.mealId}-${item.id}`}
+            className={cn(
+              "flex-grow cursor-pointer",
+              (completed || isLoading) && "text-muted-foreground"
+            )}
+          >
+            {item.name}{" "}
+            <span className="text-xs text-muted-foreground">
+              {item.portion}
+            </span>
+          </label>
 
-      {completed && <Check className="h-4 w-4 text-green-500" />}
+          {completed && <Check className="h-4 w-4 text-green-500" />}
 
-      {editMode && (
-        <div className="flex items-center gap-1">
-          <AddFoodItemDialog meal={meal} onComplete={onUpdate} item={item} />
-          <Button className="size-8 cursor-pointer" variant="secondary">
-            <Trash2Icon className="text-red-400" />
-          </Button>
+          {editMode && (
+            <div className="flex items-center gap-1">
+              <AddFoodItemDialog
+                meal={meal}
+                onComplete={onUpdate}
+                item={item}
+              />
+              <Button className="size-8 cursor-pointer" variant="secondary">
+                <Trash2Icon className="text-red-400" />
+              </Button>
+            </div>
+          )}
         </div>
-      )}
-    </li>
+
+        <div className="flex items-center gap-2 flex-wrap">
+          <Badge
+            variant={"outline"}
+            className={completed ? "text-muted-foreground" : ""}
+          >
+            {item.calories} kcal
+          </Badge>
+          <Badge
+            variant={"outline"}
+            className={completed ? "text-muted-foreground" : ""}
+          >
+            {item.proteins} proteins
+          </Badge>
+          <Badge
+            variant={"outline"}
+            className={completed ? "text-muted-foreground" : ""}
+          >
+            {item.carbs} carbs
+          </Badge>
+          <Badge
+            variant={"outline"}
+            className={completed ? "text-muted-foreground" : ""}
+          >
+            {item.fat} fat
+          </Badge>
+        </div>
+      </li>
+    </>
   );
 };

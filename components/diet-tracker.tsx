@@ -13,11 +13,6 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible";
-import {
   FullFoodItem,
   getMeals,
   MealWithFullItems,
@@ -168,7 +163,7 @@ export function DailyDietTracker({
                   {doneCount} / {meal.items.length}
                 </span>
               </div>
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-2 max-sm:grid-cols-1 gap-2">
                 {meal.items.map((item) => (
                   <DietItem
                     key={item.id}

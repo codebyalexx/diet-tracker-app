@@ -10,7 +10,7 @@ export default async function Home() {
 
   return (
     <div className="w-full min-h-screen flex items-center justify-center">
-      <div className="w-full max-w-2xl p-4 py-4 space-y-6">
+      <div className="w-full max-w-3xl p-4 py-4 space-y-6">
         <h1 className="font-bold text-2xl flex items-center justify-center gap-2 w-full">
           Diet Tracker <ThemeToggle />
         </h1>
